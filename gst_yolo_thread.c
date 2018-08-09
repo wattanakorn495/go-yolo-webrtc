@@ -19,6 +19,7 @@ static double fps;
 
 static int nboxes = 0;
 
+
 static pthread_t detect_thread;
 static pthread_mutex_t lock;
 
@@ -30,7 +31,6 @@ typedef struct RGB
   guint8 green;
   guint8 blue;
 } RGB;
-
 
 float get_pixel(image m, int x, int y, int c)
 {
@@ -99,7 +99,6 @@ cb_have_data (GstPad          *pad,
     pthread_mutex_unlock(&lock);
     
     
-
     draw_detections(image_buffer, dets, nboxes, thresh, names, alphabet, l.classes);
 
     pthread_mutex_lock(&lock);
@@ -156,14 +155,15 @@ main (gint   argc,
   GstCaps *filtercaps, *filtercaps1;
   GstPad *pad;
 
+
   /* init yolo */
   list *options = read_data_cfg("cfg/coco.data");
   char *name_list = option_find_str(options, "names", "data/names.list");
   names = get_labels(name_list);
   alphabet = load_alphabet();
 
-  char *cfg = "cfg/yolov3.cfg";
-  char *weights = "yolov3.weights";
+  char *cfg = "cfg/yolov3-tiny.cfg";
+  char *weights = "yolov3-tiny.weights";
   net = load_network(cfg,weights,0);
 
   layer l = net->layers[net->n-1];
@@ -231,7 +231,7 @@ main (gint   argc,
   gst_caps_unref (filtercaps);
 
   filtercaps1 = gst_caps_new_simple ("video/x-raw",
-                "framerate", GST_TYPE_FRACTION, 10, 1,
+                "framerate", GST_TYPE_FRACTION, 30, 1,
                //"format", G_TYPE_STRING, "RGB",
                //"width", G_TYPE_INT, 384,
                //"height", G_TYPE_INT, 288,
