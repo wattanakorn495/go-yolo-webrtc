@@ -2,6 +2,7 @@
 #include "darknet.h"
 #include <pthread.h>
 #include <unistd.h>
+#include "api/avi_yolo.h"
 
 static image image_buffer;
 static network *net;
@@ -141,10 +142,6 @@ static void *detect_image_thread(void *ptr)
   return NULL;
 }
 
-void init_yolo(char *cfgfile, char *weightfile, char *namefile)
-{
-
-}
 
 gint
 main (gint   argc,
