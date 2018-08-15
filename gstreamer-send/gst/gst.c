@@ -173,7 +173,7 @@ cb_have_data (GstPad          *pad,
 }
 
 GstElement *gstreamer_send_create_pipeline(char *pipeline) {
-  GstElement *pipeline_ob, *src, *vs, *filter, *vc, *filter1, *vk, *enc, *sink;
+  GstElement *pipeline_ob, *src, *vs, *filter, *vc, *filter1, *col,*vk, *enc, *sink;
   GstCaps *filtercaps, *filtercaps1;
   GstPad *pad;
 
@@ -228,6 +228,10 @@ GstElement *gstreamer_send_create_pipeline(char *pipeline) {
     filter1 = gst_element_factory_make ("capsfilter", "filter1");
     g_assert (filter1 != NULL); /* should always exist */
 
+    col = gst_element_factory_make ("clockoverlay", "col");
+    if (col == NULL)
+      g_error ("Could not create 'clockoverlay' element");
+
     vk = gst_element_factory_make ("videoconvert", "vk");
     if (vk == NULL)
       g_error ("Could not create 'videoconvert' element");
@@ -240,8 +244,8 @@ GstElement *gstreamer_send_create_pipeline(char *pipeline) {
     if (sink== NULL)
       g_error ("Could not create 'appsink' element");
 
-    gst_bin_add_many (GST_BIN (pipeline_ob), src, vs, filter, vc, filter1, vk, enc, sink, NULL);
-    gst_element_link_many (src, vs, filter, vc, filter1, vk, enc, sink, NULL);
+    gst_bin_add_many (GST_BIN (pipeline_ob), src, vs, filter, vc, filter1, col, vk, enc, sink, NULL);
+    gst_element_link_many (src, vs, filter, vc, filter1, col, vk, enc, sink, NULL);
     
     //g_object_set (G_OBJECT (src), "io-mode", 3, NULL);
     g_object_set (G_OBJECT (enc), "threads", 64, NULL);
@@ -272,7 +276,11 @@ GstElement *gstreamer_send_create_pipeline(char *pipeline) {
     g_object_set (G_OBJECT (enc), "deadline", 1, NULL);
     g_object_set (G_OBJECT (enc), "cpu-used", 16, NULL);
 
-    
+    g_object_set (G_OBJECT (col), "halignment", 1, NULL);
+    g_object_set (G_OBJECT (col), "valignment", 1, NULL);
+    g_object_set (G_OBJECT (col), "text", "Avilon yolo webrtc", NULL);
+    g_object_set (G_OBJECT (col), "shaded-background", TRUE, NULL);
+    g_object_set (G_OBJECT (col), "font-desc", "Sans, 36", NULL);
     
     pad = gst_element_get_static_pad (vc, "src");
     gst_pad_add_probe (pad, GST_PAD_PROBE_TYPE_BUFFER,
